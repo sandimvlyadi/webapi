@@ -155,6 +155,9 @@ class Ajax_service_model extends CI_Model {
     				$result['certification'] = $this->load_data_table('certification', $r[0]['id_company']);
     			} else{
     				$r[0]['company_name'] = 'No Company';
+    				$result['testing'] = array();
+    				$result['calibration'] = array();
+    				$result['certification'] = array();
     			}
 
     			$result['result'] = true;
