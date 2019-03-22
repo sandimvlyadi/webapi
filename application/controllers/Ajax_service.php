@@ -930,6 +930,69 @@ class Ajax_service extends CI_Controller {
                 break;
             // end of analis lingkungan
 
+            // dokumentasi tekstil
+            case 'a401b368b2a0f54cdbc357680e1cd5f9': // md5('webapi073') // ulangi pengetikan
+                $param = array(
+                    'useragent' => $this->agent,
+                    'ipaddress' => $this->input->ip_address(),
+                    'auth' => $this->input->get_request_header('Authorization', TRUE),
+                    'data' => $_POST
+                );
+                $response = $this->model->webapi073($param);
+                // $response['post'] = $param['data'];
+                break;
+            case '96ffe7fdaa4b1717020b4e6c2c4c1dc4': // md5('webapi074') // get order pelanggan
+                $param = array(
+                    'useragent' => $this->agent,
+                    'ipaddress' => $this->input->ip_address(),
+                    'auth' => $this->input->get_request_header('Authorization', TRUE),
+                    'data' => $_POST
+                );
+                $response = $this->model->webapi074($param);
+                // $response['post'] = $param['data'];
+                break;
+            case '7c8b8fe1ed2a316c2a81dc2d0b99d009': // md5('webapi075') // isian dokumen
+                $param = array(
+                    'useragent' => $this->agent,
+                    'ipaddress' => $this->input->ip_address(),
+                    'auth' => $this->input->get_request_header('Authorization', TRUE),
+                    'data' => $_POST
+                );
+                $response = $this->model->webapi075($param);
+                // $response['post'] = $param['data'];
+                break;
+            case '9779e20e7df3eb909d62c3136ec0beed': // md5('webapi076') // simpan / update isian dokumen
+                $param = array(
+                    'useragent' => $this->agent,
+                    'ipaddress' => $this->input->ip_address(),
+                    'auth' => $this->input->get_request_header('Authorization', TRUE),
+                    'data' => $_POST
+                );
+                $response = $this->model->webapi076($param);
+                // $response['post'] = $param['data'];
+                break;
+            case '547f21a9ff5c5e6be7b7fd52578e542d': // md5('webapi077') // simpan dokumentasi
+                $param = array(
+                    'useragent' => $this->agent,
+                    'ipaddress' => $this->input->ip_address(),
+                    'auth' => $this->input->get_request_header('Authorization', TRUE),
+                    'data' => $_POST
+                );
+                $response = $this->model->webapi077($param);
+                // $response['post'] = $param['data'];
+                break;
+            case '730dbdba4538afa8998ff28d6f395db2': // md5('webapi078') // get data arsip
+                $param = array(
+                    'useragent' => $this->agent,
+                    'ipaddress' => $this->input->ip_address(),
+                    'auth' => $this->input->get_request_header('Authorization', TRUE),
+                    'data' => $_POST
+                );
+                $response = $this->model->webapi078($param);
+                // $response['post'] = $param['data'];
+                break;
+            // end of dokumentasi tekstil
+
     		default:
     			$response['result'] = false;
                 $response['msg'] = 'Invalid request.';
@@ -1019,6 +1082,30 @@ class Ajax_service extends CI_Controller {
                             'upload' => $this->upload->data()
                         );
                         $response = $this->model->webapi002_upload($param);
+                        // $response['post'] = $param;
+                    }
+                    break;
+                case '92e56b76b7301b0f81098f6736e2c33a': // md5('webapi003_upload') // dokumentasi > lampiran gabungan
+                    $config['upload_path']      = '../silateks/assets/dokumen_lampiran/lampiran_gabungan/';
+                    $config['allowed_types']    = 'doc|docx|xls|xlsx';
+                    $config['max_size']         = 10240;
+                    $config['encrypt_name']     = FALSE;
+                    $config['overwrite']        = FALSE;
+
+                    $this->upload->initialize($config);
+
+                    if(!$this->upload->do_upload('file')){
+                        $response['msg']    = $this->upload->display_errors();
+                    } else{
+                        $param = array(
+                            'useragent' => $this->agent,
+                            'ipaddress' => $this->input->ip_address(),
+                            'auth' => $this->input->get_request_header('Authorization', TRUE),
+                            'data' => $_POST,
+                            'token' => $token,
+                            'upload' => $this->upload->data()
+                        );
+                        $response = $this->model->webapi003_upload($param);
                         // $response['post'] = $param;
                     }
                     break;

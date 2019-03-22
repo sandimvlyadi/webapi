@@ -2578,13 +2578,13 @@ class Ajax_service_model extends CI_Model {
                 $result['target'] = '../analis/kalibrasi/dashboard.html';
             // Dokumentasi Tekstil
             } elseif ($nama_bagian == 'Layanan Pengujian Tekstil' && $nama_jabatan == 'Dokumentasi') {
-                # code...
+                $result['target'] = '../dokumentasi/tekstil/dashboard.html';
             // Dokumentasi Kalibrasi
             } elseif ($nama_bagian == 'Layanan Kalibrasi' && $nama_jabatan == 'Dokumentasi') {
-                # code...
+                $result['target'] = '../dokumentasi/kalibrasi/dashboard.html';
             // Dokumentasi Lingkungan
             } elseif ($nama_bagian == 'Layanan Pengujian Lingkungan' && $nama_jabatan == 'Dokumentasi') {
-                # code...
+                $result['target'] = '../dokumentasi/lingkungan/dashboard.html';
             } else{
                 $result['target'] = '../dashboard/dashboard.html';
             }
@@ -7196,6 +7196,407 @@ class Ajax_service_model extends CI_Model {
     }
     // end of analis lingkungan
 
+    // dokumentasi tekstil
+    function webapi073($data = array())
+    {
+        $result = array('result' => false, 'msg' => '', 'data' => array());
+        $token = $data['data']['token'];
+        $param = $data['data']['id'];
+
+        $valid = $this->secret_key_validation($data['auth']);
+        if (!$valid) {
+            $result['msg'] = 'Unauthorized access.';
+            return $result;
+        }
+
+        $isValid = $this->employee_token_validation(array('id' => $token['id_user'], 'token' => $token['token']));
+        if ($isValid) {
+            $DB = $this->load->database('si_tekstil', TRUE);
+            $Q =    "UPDATE 
+                        `pemesanan` 
+                    JOIN 
+                        `pengujian_parameter` 
+                            USING(`id_pemesanan`)
+                    SET
+                        `status_pemesanan` = 'Pembuatan Sertifikat',
+                        `status_pengerjaan` = 'Dokumentasi'
+                    WHERE
+                        `id_pemesanan` = '". $this->db->escape_str($param) ."'
+                    ;";
+            if ($DB->simple_query($Q)) {
+                $result['result'] = true;
+                $result['msg'] = 'Berhasil.';
+            } else{
+                $result['msg'] = 'Gagal.';
+            }
+        } else{
+            $result['msg'] = 'Your session was not valid.';
+        }
+
+        return $result;
+    }
+
+    function webapi074($data = array())
+    {
+        $result = array('result' => false, 'msg' => '', 'data' => array());
+        $token = $data['data']['token'];
+        $param = $data['data']['id'];
+
+        $valid = $this->secret_key_validation($data['auth']);
+        if (!$valid) {
+            $result['msg'] = 'Unauthorized access.';
+            return $result;
+        }
+
+        $isValid = $this->employee_token_validation(array('id' => $token['id_user'], 'token' => $token['token']));
+        if ($isValid) {
+            $DB = $this->load->database('si_tekstil', TRUE);
+            $Q1 =    "SELECT 
+                        * 
+                    FROM 
+                        `pemesanan` 
+                    JOIN 
+                        `pelanggan` 
+                            USING(`id_pelanggan`) 
+                    JOIN 
+                        `kota` 
+                            USING(`id_kota`) 
+                    JOIN 
+                        `provinsi` 
+                            USING(`id_provinsi`) 
+                    WHERE 
+                        `id_pemesanan` = '". $this->db->escape_str($param) ."'
+                    ;";
+            $R1 = $DB->query($Q1, false)->result_array();
+
+            $Q2 =   "SELECT 
+                        * 
+                    FROM 
+                        `pemesanan` 
+                    JOIN 
+                        `kelengkapan_pemesanan` 
+                            USING(`id_pemesanan`) 
+                    JOIN 
+                        `pelanggan` 
+                            USING(`id_pelanggan`) 
+                    WHERE 
+                        `id_pemesanan` = '". $this->db->escape_str($param) ."'
+                    ;";
+            $R2 = $DB->query($Q2, false)->result_array();
+
+            $Q3 =   "SELECT 
+                        * 
+                    FROM
+                        `pemesanan` 
+                    JOIN 
+                        `pelanggan` 
+                            USING(`id_pelanggan`) 
+                    JOIN 
+                        `kelengkapan_pemesanan` 
+                            USING(`id_pemesanan`) 
+                    LEFT JOIN 
+                        `hal_sertifikat` 
+                            USING(`id_ko`) 
+                    WHERE 
+                        `id_pemesanan` = '". $this->db->escape_str($param) ."'
+                    ;";
+            $R3 = $DB->query($Q3, false)->result_array();
+            if (count($R1) > 0 && count($R2) > 0 && count($R3) > 0) {
+                $Q4 = "SELECT MAX(MID(id_sertifikat,4,4)) AS `idmax` FROM `hal_sertifikat`;";
+                $R4 = $DB->query($Q4, false)->result_array();
+                $kd = "";
+                if(count($R4) > 0){
+                    for ($i=0; $i < count($R4); $i++) { 
+                        $tmp = ((int)$R4[$i]['idmax']) + 1;
+                        $kd = sprintf("%04s", $tmp);
+                    }
+                }
+                else{ 
+                    $kd = "0001"; 
+                }
+
+                $sk = "SK";
+                $bulan = date("m");
+                $tahun = date("Y");
+
+                $kode = $sk.'-'.$kd.'/'.$bulan.'/'.$tahun;
+
+                $result['result'] = true;
+                $result['data'] = array(
+                    'customer'      => $R1[0],
+                    'lampiran_gab'  => $R2[0],
+                    'sertifikat'    => $R3[0],
+                    'kode_id'       => $kode
+                );
+            }
+        } else{
+            $result['msg'] = 'Your session was not valid.';
+        }
+
+        return $result;
+    }
+
+    function webapi075($data = array())
+    {
+        $result = array('result' => false, 'msg' => '', 'data' => array());
+        $token = $data['data']['token'];
+        $param = $data['data']['id'];
+
+        $valid = $this->secret_key_validation($data['auth']);
+        if (!$valid) {
+            $result['msg'] = 'Unauthorized access.';
+            return $result;
+        }
+
+        $isValid = $this->employee_token_validation(array('id' => $token['id_user'], 'token' => $token['token']));
+        if ($isValid) {
+            $DB = $this->load->database('si_tekstil', TRUE);
+            $Q =    "SELECT 
+                        * 
+                    FROM 
+                        `pemesanan` 
+                    JOIN 
+                        `pelanggan` 
+                            USING(`id_pelanggan`) 
+                    JOIN 
+                        `pengujian_parameter` 
+                            USING(`id_pemesanan`) 
+                    JOIN 
+                        `parameter` 
+                            USING(`id_parameter`) 
+                    JOIN 
+                        `contoh` 
+                            USING(`id_contoh`) 
+                    JOIN 
+                        `kategori` 
+                            USING(`id_kategori`) 
+                    JOIN 
+                        `laboratorium` 
+                            USING(`id_lab`) 
+                    WHERE 
+                        `id_pengujian` = '". $this->db->escape_str($param) ."'
+                    ;";
+            $R = $DB->query($Q, false)->result_array();
+            if (count($R) > 0) {
+                $result['data'] = $R[0];
+            }
+            $result['result'] = true;
+        } else{
+            $result['msg'] = 'Your session was not valid.';
+        }
+
+        return $result;
+    }
+
+    function webapi076($data = array())
+    {
+        $result = array('result' => false, 'msg' => '', 'data' => array());
+        $token = $data['data']['token'];
+        $param = array(
+            'id'    => $data['data']['id'],
+            'merek' => $data['data']['merek'],
+            'tipe'  => $data['data']['tipe']
+        );
+
+        $valid = $this->secret_key_validation($data['auth']);
+        if (!$valid) {
+            $result['msg'] = 'Unauthorized access.';
+            return $result;
+        }
+
+        $isValid = $this->employee_token_validation(array('id' => $token['id_user'], 'token' => $token['token']));
+        if ($isValid) {
+            $DB = $this->load->database('si_tekstil', TRUE);
+            $Q =    "UPDATE 
+                        `pengujian_parameter` 
+                    SET 
+                        `merek` = '". $this->db->escape_str($param['merek']) ."', 
+                        `tipe` = '". $this->db->escape_str($param['tipe']) ."', 
+                        `ket_dokumentasi` = 'Sudah Diisi' 
+                    WHERE 
+                        `id_pengujian` = '". $this->db->escape_str($param['id']) ."'
+                    ;";
+            if ($DB->simple_query($Q)) {
+                $result['result'] = true;
+                $result['msg'] = 'Berhasil.';
+            } else{
+                $result['msg'] = 'Gagal.';
+            }
+        } else{
+            $result['msg'] = 'Your session was not valid.';
+        }
+
+        return $result;
+    }
+
+    function webapi077($data = array())
+    {
+        $result = array('result' => false, 'msg' => '', 'data' => array());
+        $token = $data['data']['token'];
+        $param = array(
+            'id'            => $data['data']['id'],
+            'id_ko'         => $data['data']['id_ko'],
+            'id_sertifikat' => $data['data']['id_sertifikat']
+        );
+
+        $valid = $this->secret_key_validation($data['auth']);
+        if (!$valid) {
+            $result['msg'] = 'Unauthorized access.';
+            return $result;
+        }
+
+        $isValid = $this->employee_token_validation(array('id' => $token['id_user'], 'token' => $token['token']));
+        if ($isValid) {
+            $DB = $this->load->database('si_tekstil', TRUE);
+            if ($param['id_sertifikat'] == '0' || $param['id_sertifikat'] == 0) {
+                $Q1 =    "UPDATE 
+                            `hal_sertifikat` 
+                        SET 
+                            `tgl_terbit` = '". date('Y-m-d') ."' 
+                        WHERE 
+                            `id_ko` = '". $this->db->escape_str($param['id_ko']) ."'
+                        ;";
+                $Q2 =   "UPDATE 
+                            pemesanan 
+                        join 
+                            pengujian_parameter 
+                                using(id_pemesanan) 
+                        SET 
+                            `status_pemesanan` = 'Validasi Sertifikat', 
+                            `status_pengerjaan` = 'MT' 
+                        WHERE 
+                            `id_pemesanan` = '". $this->db->escape_str($param['id']) ."'
+                        ;";
+                $Q3 =   "INSERT INTO 
+                            `status_his` 
+                            (
+                                `id_wo`,
+                                `id_anggota`,
+                                `kategori`,
+                                `status`,
+                                `tanggal`,
+                                `keterangan`
+                            ) 
+                        VALUES 
+                            (
+                                '". $this->db->escape_str($param['id']) ."',
+                                '". $this->db->escape_str($token['id_user']) ."',
+                                'Pengujian',
+                                'Manajer Teknik',
+                                '". date('Y-m-d H:i:s') ."',
+                                'Validasi Sertifikat'
+                            )
+                        ;";
+                if ($DB->simple_query($Q1) && $DB->simple_query($Q2) && $DB->simple_query($Q3)) {
+                    $result['result'] = true;
+                    $result['msg'] = 'Berhasil.';
+                } else{
+                    $result['msg'] = 'Gagal.';
+                }
+            } else{
+                $Q1 =    "INSERT INTO 
+                            `hal_sertifikat` 
+                            (
+                                `id_sertifikat`,
+                                `id_ko`,
+                                `tgl_terbit`
+                            ) 
+                        VALUES 
+                            (
+                                '". $this->db->escape_str($param['id_sertifikat']) ."',
+                                '". $this->db->escape_str(intval($param['id_ko'])) ."',
+                                '". date('Y-m-d') ."'
+                            )
+                        ;";
+                $Q2 =   "UPDATE 
+                            pemesanan 
+                        join 
+                            pengujian_parameter 
+                                using(id_pemesanan) 
+                        SET 
+                            `status_pemesanan` = 'Validasi Sertifikat', 
+                            `status_pengerjaan` = 'MT' 
+                        WHERE 
+                            `id_pemesanan` = '". $this->db->escape_str($param['id']) ."'
+                        ;";
+                $Q3 =   "INSERT INTO 
+                            `status_his` 
+                            (
+                                `id_wo`,
+                                `id_anggota`,
+                                `kategori`,
+                                `status`,
+                                `tanggal`,
+                                `keterangan`
+                            ) 
+                        VALUES 
+                            (
+                                '". $this->db->escape_str($param['id']) ."',
+                                '". $this->db->escape_str($token['id_user']) ."',
+                                'Pengujian',
+                                'Manajer Teknik',
+                                '". date('Y-m-d H:i:s') ."',
+                                'Validasi Sertifikat'
+                            )
+                        ;";
+                if ($DB->simple_query($Q1) && $DB->simple_query($Q2) && $DB->simple_query($Q3)) {
+                    $result['result'] = true;
+                    $result['msg'] = 'Berhasil.';
+                } else{
+                    $result['msg'] = 'Gagal.';
+                }
+            }
+        } else{
+            $result['msg'] = 'Your session was not valid.';
+        }
+
+        return $result;
+    }
+
+    function webapi078($data = array())
+    {
+        $result = array('result' => false, 'msg' => '', 'data' => array());
+        $token = $data['data']['token'];
+        $param = $data['data']['id'];
+
+        $valid = $this->secret_key_validation($data['auth']);
+        if (!$valid) {
+            $result['msg'] = 'Unauthorized access.';
+            return $result;
+        }
+
+        $isValid = $this->employee_token_validation(array('id' => $token['id_user'], 'token' => $token['token']));
+        if ($isValid) {
+            $DB = $this->load->database('si_tekstil', TRUE);
+            $Q =    "SELECT 
+                        * 
+                    FROM 
+                        `pemesanan` 
+                    JOIN 
+                        `pelanggan` 
+                            USING(`id_pelanggan`) 
+                    JOIN 
+                        `kota` 
+                            USING(`id_kota`) 
+                    JOIN 
+                        `provinsi` 
+                            USING(`id_provinsi`)
+                    WHERE 
+                        `id_pemesanan` = '". $this->db->escape_str($param) ."'
+                    ;";
+            $R = $DB->query($Q, false)->result_array();
+            if (count($R) > 0) {
+                $result['result'] = true;
+                $result['data'] = $R[0];
+            }
+        } else{
+            $result['msg'] = 'Your session was not valid.';
+        }
+
+        return $result;
+    }
+    // end of dokumentasi tekstil
+
     function webapi001_upload($data = array())
     {
     	$table = $this->db->dbprefix. 't_user_detail';
@@ -7260,6 +7661,43 @@ class Ajax_service_model extends CI_Model {
                 $result['data'] = array(
                     'barang_uji'    => $this->get_order_barang_analis($param['id_pemesanan'], $token['id'])
                 );
+            } else{
+                $result['msg'] = 'Gagal.';
+            }
+        } else{
+            $result['msg'] = 'Your session was not valid.';
+        }
+
+        return $result;
+    }
+
+    function webapi003_upload($data = array())
+    {
+        $result = array('result' => false, 'msg' => '', 'data' => array());
+        $token = $data['token'];
+        $param = $data['data']['id'];
+        $upload = $data['upload'];
+
+        $valid = $this->secret_key_validation($data['auth']);
+        if (!$valid) {
+            $result['msg'] = 'Unauthorized access.';
+            return $result;
+        }
+
+        $isValid = $this->employee_token_validation(array('id' => $token['id'], 'token' => $token['token']));
+        if ($isValid) {
+            $DB = $this->load->database('si_tekstil', TRUE);
+            $Q =    "UPDATE 
+                        `kelengkapan_pemesanan` 
+                    SET 
+                        `lampiran_gab` = '". $this->db->escape_str($upload['file_name']) ."' 
+                    WHERE 
+                        `id_pemesanan` = '". $this->db->escape_str($param) ."'
+                    ;";
+            if ($DB->simple_query($Q)) {
+                $result['result'] = true;
+                $result['msg'] = 'Berhasil.';
+                $result['file_name'] = $upload['file_name'];
             } else{
                 $result['msg'] = 'Gagal.';
             }
