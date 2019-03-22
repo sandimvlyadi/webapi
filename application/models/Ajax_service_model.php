@@ -2964,13 +2964,13 @@ class Ajax_service_model extends CI_Model {
                     $result['target'] = '../analis/kalibrasi/dashboard.html';
                 // Dokumentasi Tekstil
                 } elseif ($nama_bagian == 'Layanan Pengujian Tekstil' && $nama_jabatan == 'Dokumentasi') {
-                    # code...
+                    $result['target'] = '../dokumentasi/tekstil/dashboard.html';
                 // Dokumentasi Kalibrasi
                 } elseif ($nama_bagian == 'Layanan Kalibrasi' && $nama_jabatan == 'Dokumentasi') {
-                    # code...
+                    $result['target'] = '../dokumentasi/kalibrasi/dashboard.html';
                 // Dokumentasi Lingkungan
                 } elseif ($nama_bagian == 'Layanan Pengujian Lingkungan' && $nama_jabatan == 'Dokumentasi') {
-                    # code...
+                    $result['target'] = '../dokumentasi/lingkungan/dashboard.html';
                 } else{
                     $result['target'] = '../dashboard/dashboard.html';
                 }
